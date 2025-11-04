@@ -8,12 +8,15 @@ import {
 import Draggable from "@/components/page-components/root/draggable";
 import Droppable from "@/components/page-components/root/droppable";
 import { useState } from "react";
+import { useGetTasks } from "@/api-hooks/queries";
 
 export const Route = createFileRoute("/")({
   component: Index,
 });
 
 function Index() {
+  const { data: tasks } = useGetTasks();
+
   const [data, setData] = useState<
     Array<{ id: string; parentContainer?: string | number }>
   >([
