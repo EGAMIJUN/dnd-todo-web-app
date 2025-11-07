@@ -189,7 +189,7 @@ function Index() {
               >
                 {activeTask && (
                   <Draggable
-                    className="transform rotate-6"
+                    className="transform rotate-6 opacity-70"
                     data={activeTask!}
                   />
                 )}

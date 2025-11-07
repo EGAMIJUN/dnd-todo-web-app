@@ -8,7 +8,7 @@ import {
 import type { ReactElement } from "react";
 
 type Props = {
-  className: string;
+  className?: string;
   title: string;
   description: string;
   icon: ReactElement;

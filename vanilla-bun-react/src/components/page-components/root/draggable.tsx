@@ -74,7 +74,7 @@ const DraggableContent = memo(({ data }: DraggableContentProps) => {
                 </DialogFooter>
               </DialogContent>
             ) : (
-              <DialogContent></DialogContent>
+              <DialogContent aria-hidden />
             )}
           </Dialog>
         </div>

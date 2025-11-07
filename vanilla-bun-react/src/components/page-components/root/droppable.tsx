@@ -10,7 +10,7 @@ import { useDroppable } from "@dnd-kit/core";
 import { memo, useState, type ComponentProps } from "react";
 import Draggable from "./draggable";
 import type { Task } from "@/types";
-import { NotepadText, Plus } from "lucide-react";
+import { NotepadText, Plus, UserRoundX } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Dialog,
@@ -243,7 +243,7 @@ const CreateTaskDialog = () => {
                         )}
                       </SelectTrigger>
                       <SelectContent>
-                        {isSuccess && (
+                        {isSuccess && picList.picList.length > 0 ? (
                           <SelectGroup>
                             <SelectLabel>Assignees</SelectLabel>
                             {picList.picList.map((pic) => (
@@ -252,6 +252,13 @@ const CreateTaskDialog = () => {
                               </SelectItem>
                             ))}
                           </SelectGroup>
+                        ) : (
+                          <EmptyComponent
+                            className="bg-background m-4"
+                            icon={<UserRoundX />}
+                            title="No Assignees Found"
+                            description="No assignees are currently available"
+                          />
                         )}
                       </SelectContent>
                     </Select>
