@@ -26,6 +26,7 @@ const Draggable = memo(
       id: data.id,
       data: {
         task: data,
+        type: "draggable-task",
       },
     });
 

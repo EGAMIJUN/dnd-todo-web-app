@@ -20,4 +20,7 @@ export type Task = {
 export type PIC = {
   id: number;
   name: string;
+  tableId: number;
+  seatNumber: number;
+  image?: string;
 };

@@ -6,22 +6,19 @@ import {
   useSensor,
   type DragEndEvent,
   type DragMoveEvent,
+  type DragOverEvent,
   type DragStartEvent,
 } from "@dnd-kit/core";
 import Draggable from "@/components/page-components/root/draggable";
 import Droppable from "@/components/page-components/root/droppable";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useGetTasks } from "@/api-hooks/queries";
-import { useMoveTask } from "@/api-hooks/mutations";
-import type { Task } from "@/types";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { useMovePic, useMoveTask } from "@/api-hooks/mutations";
 import DroppablePIC from "@/components/page-components/root/droppable-pic";
+import SeatPlan from "@/components/page-components/root/seat-plan";
+import type { TaskStatus } from "@/types/contants";
+import { DataContext } from "@/context";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -29,10 +26,15 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const { data, isSuccess } = useGetTasks();
-  const [activeTask, setActiveTask] = useState<{ id: number; title: string }>();
-  const [localTasks, setLocaltasks] = useState<Array<Task>>();
+  const [activeItem, setActiveItem] = useState<
+    { id: number; title: string } | { id: number; name: string }
+  >();
+
+  const { localTasks, setLocalTasks, localPics, setLocalPics } =
+    useContext(DataContext)!;
 
   const moveTaskMutation = useMoveTask();
+  const movePicSeatMutation = useMovePic();
 
   const backlogTasks = useMemo(() => {
     if (!localTasks || localTasks.length === 0) return undefined;
@@ -61,88 +63,127 @@ function Index() {
 
   useEffect(() => {
     if (!isSuccess) return;
-    setLocaltasks(data.tasks);
+    setLocalTasks(data.tasks);
   }, [data, isSuccess]);
+
+  const updateTaskStatus = async (
+    activeId: string | number,
+    status: TaskStatus,
+  ) => {
+    setLocalTasks((prev) => {
+      return prev?.map((t) => {
+        if (t.id === activeId) return { ...t, status };
+        return t;
+      });
+    });
+    toast.promise(
+      moveTaskMutation.mutateAsync({
+        taskId: Number(activeId),
+        status,
+      }),
+      {
+        loading: "Moving task...",
+        success: (data) => {
+          return data.message;
+        },
+        error: (error) => {
+          return error.message;
+        },
+      },
+    );
+  };
 
   const handleDragEnd = async (event: DragEndEvent) => {
     const { over, active } = event;
 
     if (over) {
-      if (over.id === "backlog-container") {
-        if (backlogTasks?.some((d) => d.id === active.id)) return;
-        setLocaltasks((prev) => {
-          return prev?.map((t) => {
-            if (t.id === active.id) return { ...t, status: "Backlog" };
-            return t;
-          });
-        });
-        await moveTaskMutation.mutateAsync({
-          taskId: Number(active.id),
-          status: "Backlog",
-        });
-      } else if (over.id === "inprogress-container") {
-        if (inProgressTasks?.some((d) => d.id === active.id)) return;
-        setLocaltasks((prev) => {
-          return prev?.map((t) => {
-            if (t.id === active.id) return { ...t, status: "In Progress" };
-            return t;
-          });
-        });
-        await moveTaskMutation.mutateAsync({
-          taskId: Number(active.id),
-          status: "In Progress",
-        });
-      } else if (over.id === "completed-container") {
-        if (completedTasks?.some((d) => d.id === active.id)) return;
-        setLocaltasks((prev) => {
-          return prev?.map((t) => {
-            if (t.id === active.id) return { ...t, status: "Completed" };
-            return t;
-          });
-        });
-        await moveTaskMutation.mutateAsync({
-          taskId: Number(active.id),
-          status: "Completed",
-        });
-      } else if (over.id === "fortesting-container") {
-        if (forTestingTasks?.some((d) => d.id === active.id)) return;
-        setLocaltasks((prev) => {
-          return prev?.map((t) => {
-            if (t.id === active.id) return { ...t, status: "For Testing" };
-            return t;
-          });
-        });
-        await moveTaskMutation.mutateAsync({
-          taskId: Number(active.id),
-          status: "For Testing",
-        });
-      } else if (over.id === "finished-container") {
-        if (finishedTasks?.some((d) => d.id === active.id)) return;
-        setLocaltasks((prev) => {
-          return prev?.map((t) => {
-            if (t.id === active.id) return { ...t, status: "Finished" };
-            return t;
-          });
-        });
-        await moveTaskMutation.mutateAsync({
-          taskId: Number(active.id),
-          status: "Finished",
-        });
+      if (
+        String(over.id).includes("container") &&
+        active?.data.current?.type === "draggable-task"
+      ) {
+        if (over.id === "backlog-container") {
+          if (backlogTasks?.some((d) => d.id === active.id)) return;
+          updateTaskStatus(active.id, "Backlog");
+        } else if (over.id === "inprogress-container") {
+          if (inProgressTasks?.some((d) => d.id === active.id)) return;
+          updateTaskStatus(active.id, "In Progress");
+        } else if (over.id === "completed-container") {
+          if (completedTasks?.some((d) => d.id === active.id)) return;
+          updateTaskStatus(active.id, "Completed");
+        } else if (over.id === "fortesting-container") {
+          if (forTestingTasks?.some((d) => d.id === active.id)) return;
+          updateTaskStatus(active.id, "For Testing");
+        } else if (over.id === "finished-container") {
+          if (finishedTasks?.some((d) => d.id === active.id)) return;
+          updateTaskStatus(active.id, "Finished");
+        }
       } else if (String(over.id).includes("droppable-seat")) {
-        console.log("seat");
+        if (String(active.id).includes("draggable-seat")) {
+          setLocalPics((prev) => {
+            if (!prev) return undefined;
+            const selectedPic = prev?.find(
+              (p) => p.id === Number(active.data.current?.pic.id),
+            )!;
+            const targetPic = prev?.find(
+              (p) => p.id === Number(over.data.current?.pic.id),
+            )!;
+
+            const newPic = prev?.map((pic) => {
+              if (pic.id === selectedPic?.id)
+                return {
+                  ...selectedPic,
+                  id: targetPic.id,
+                  name: targetPic.name,
+                };
+              if (pic.id === targetPic?.id)
+                return {
+                  ...targetPic,
+                  id: selectedPic.id,
+                  name: selectedPic.name,
+                };
+
+              return pic;
+            });
+
+            return newPic;
+          });
+          toast.promise(
+            movePicSeatMutation.mutateAsync({
+              targetPicId: Number(over.data.current?.pic.id),
+              selectedPicId: Number(active.data.current?.pic.id),
+            }),
+            {
+              loading: "Moving seat...",
+              success: (data) => {
+                return data.message;
+              },
+              error: (error) => {
+                return error.message;
+              },
+            },
+          );
+        } else if (active?.data.current?.type === "draggable-task") {
+        }
       }
     }
-    setActiveTask(undefined);
+    setActiveItem(undefined);
   };
 
   const handleDragStart = (event: DragStartEvent) => {
     const { active } = event;
 
     if (active) {
-      setActiveTask({
-        id: Number(active.id),
-        title: active.data.current?.task.title,
-      });
+      if (String(active.id).includes("draggable-seat")) {
+        setActiveItem({
+          id: Number(active.data.current?.pic.id),
+          name: active.data.current?.pic.name,
+        });
+      } else {
+        setActiveItem({
+          id: Number(active.id),
+          title: active.data.current?.task.title,
+        });
+      }
     }
   };
 
@@ -187,10 +228,15 @@ function Index() {
                   easing: "cubic-bezier(0.18, 0.67, 0.6, 1.22)",
                 }}
               >
-                {activeTask && (
+                {activeItem && "title" in activeItem ? (
                   <Draggable
                     className="transform rotate-6 opacity-70"
-                    data={activeTask!}
+                    data={activeItem}
+                  />
+                ) : (
+                  <DroppablePIC
+                    id={activeItem?.id.toString()!}
+                    pic={activeItem}
                   />
                 )}
               </DragOverlay>
@@ -198,30 +244,7 @@ function Index() {
           )}
         </div>
         <div className="">
-          <Card>
-            <CardHeader>
-              <CardTitle>Seat Arrangement </CardTitle>
-              <CardDescription>
-                Drag and drop a task to pic to assign
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="bg-background mx-6 py-6 grid grid-cols-2 gap-16">
-              {(() => {
-                return Array.from({ length: 6 }, (_, indextab) => (
-                  <div key={indextab} className="grid grid-cols-3 gap-4">
-                    {Array.from({ length: 6 }, (_, indexseat) => (
-                      <div key={indexseat}>
-                        <DroppablePIC
-                          id={`droppable-seat-${indextab}${indexseat}`}
-                          header="xdd"
-                        />
-                      </div>
-                    ))}
-                  </div>
-                ));
-              })()}
-            </CardContent>
-          </Card>
+          <SeatPlan />
         </div>
       </div>
     </DndContext>

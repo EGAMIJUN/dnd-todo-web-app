@@ -6,7 +6,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { useDroppable } from "@dnd-kit/core";
+import { useDndContext, useDroppable } from "@dnd-kit/core";
 import { memo, useState, type ComponentProps } from "react";
 import Draggable from "./draggable";
 import type { Task } from "@/types";
@@ -45,7 +45,6 @@ import { useGetPicList } from "@/api-hooks/queries";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "sonner";
 import EmptyComponent from "@/components/state-components/empty";
-import { Badge } from "@/components/ui/badge";
 
 const Droppable = memo(
   ({
@@ -57,6 +56,8 @@ const Droppable = memo(
     data: Array<Task>;
     header: string;
   }) => {
+    const con = useDndContext();
+
     const { isOver, setNodeRef } = useDroppable({
       id,
     });
@@ -65,7 +66,9 @@ const Droppable = memo(
       <Card
         ref={setNodeRef}
         className={cn(
-          isOver ? "bg-primary/20" : "bg-secondary",
+          isOver && con.active?.data.current?.type === "draggable-task"
+            ? "bg-primary/20"
+            : "bg-secondary",
           "h-fit shadow-xl",
         )}
       >

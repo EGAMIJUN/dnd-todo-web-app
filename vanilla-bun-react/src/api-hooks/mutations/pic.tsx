@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import API from "../helpers/api-methods";
 import type { TaskStatus } from "@/types/contants";
 
-const usePic = () => {
+const useCreatePic = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (payload: { taskId: number; status: TaskStatus }) => {
@@ -14,9 +14,29 @@ const usePic = () => {
       return response;
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      await queryClient.invalidateQueries({ queryKey: ["pic-list"] });
     },
   });
 };
 
-export { usePic };
+const useMovePic = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (payload: {
+      targetPicId: number;
+      selectedPicId: number;
+    }) => {
+      const response = await API.put<
+        { message: string },
+        { targetPicId: number; selectedPicId: number }
+      >("/pic/", payload);
+
+      return response;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["pic-list"] });
+    },
+  });
+};
+
+export { useCreatePic, useMovePic };
