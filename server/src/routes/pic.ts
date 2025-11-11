@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { getPicList, setPicList } from "../../data";
-import { createPicValidator } from "../validators/pic";
+import { createPicValidator, movePicValidator } from "../validators/pic";
 
 const picRoutes = new Hono();
 
@@ -22,23 +22,43 @@ picRoutes.post("/", createPicValidator, (c) => {
   currentPicList.push({
     id: currentPicList.length + 1,
     name: newData.name,
+    tableId: newData.tableId,
+    seatNumber: newData.seatNumber,
+    image: "something",
   });
   setPicList(currentPicList);
   return c.json({ message: "success" });
 });
 
-// picRoutes.put("/", moveTaskValidator, (c) => {
-//   const moveData = c.req.valid("json");
-//
-//   const updatedData = getPicList().map((task) => {
-//     if (task.id === moveData.taskId)
-//       return { ...task, status: moveData.status };
-//     return task;
-//   });
-//
-//   setPicList(updatedData);
-//
-//   return c.json({ message: "success" });
-// });
+picRoutes.put("/", movePicValidator, (c) => {
+  const data = c.req.valid("json");
+
+  const targetPIC = getPicList().find((p) => p.id === data.targetPicId)!;
+
+  const selectedPIC = getPicList().find((p) => p.id === data.selectedPicId)!;
+
+  const updatedData = getPicList().map((pic) => {
+    if (pic.id === data.targetPicId)
+      // update target pic location to selected location
+      return {
+        ...selectedPIC,
+        id: targetPIC?.id!,
+        name: targetPIC?.name!,
+      };
+    if (pic.id === data.selectedPicId) {
+      // update pic location to target pic previous location
+      return {
+        ...targetPIC,
+        id: selectedPIC?.id!,
+        name: selectedPIC?.name!,
+      };
+    }
+    return pic;
+  });
+
+  setPicList(updatedData);
+
+  return c.json({ message: "success" });
+});
 
 export { picRoutes };
