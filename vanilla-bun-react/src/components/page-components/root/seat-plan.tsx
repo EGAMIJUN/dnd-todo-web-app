@@ -7,8 +7,8 @@ import {
 } from "@/components/ui/card";
 import { useGetPicList } from "@/api-hooks/queries";
 import { useContext, useEffect, useMemo, useState } from "react";
-import DroppableTable from "./droppable-table";
 import { DataContext } from "@/context";
+import SeatTable from "./seat-table";
 
 const SeatPlan = () => {
   const { data: picList, isSuccess } = useGetPicList();
@@ -42,11 +42,7 @@ const SeatPlan = () => {
         {isSuccess &&
           picTables?.map((pt, index) => {
             return (
-              <DroppableTable
-                key={index}
-                data={pt.list!}
-                id={String(pt.tableId)}
-              />
+              <SeatTable key={index} data={pt.list!} id={String(pt.tableId)} />
             );
           })}
       </CardContent>

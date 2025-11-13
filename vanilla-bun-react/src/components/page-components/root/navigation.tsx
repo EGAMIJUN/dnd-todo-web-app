@@ -6,6 +6,7 @@ import {
   NavigationMenuList,
 } from "@/components/ui/navigation-menu";
 import { Link } from "@tanstack/react-router";
+import ProjectsDialog from "./projects-dialog";
 
 const Navigation = () => {
   return (
@@ -13,20 +14,20 @@ const Navigation = () => {
       <NavigationMenuList>
         <NavigationMenuItem>
           <NavigationMenuLink asChild>
-            <Link to="/" className="font-semibold text-xl font-headers">
+            <Link to="/" className="font-medium text-xl">
               Home
             </Link>
           </NavigationMenuLink>
         </NavigationMenuItem>
         <NavigationMenuItem>
           <NavigationMenuLink asChild>
-            <Link
-              to="/create-task"
-              className="font-semibold text-xl font-headers"
-            >
-              Create Task
+            <Link to="/create-task" className="font-medium text-xl">
+              Maintenance
             </Link>
           </NavigationMenuLink>
+        </NavigationMenuItem>
+        <NavigationMenuItem>
+          <ProjectsDialog />
         </NavigationMenuItem>
       </NavigationMenuList>
       <NavigationMenuList>
