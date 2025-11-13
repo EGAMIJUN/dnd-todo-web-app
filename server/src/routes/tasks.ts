@@ -5,7 +5,6 @@ import {
   moveTaskValidator,
   taskIdParamValidator,
 } from "../validators/task";
-import { setData, getData, getPicList } from "../../data";
 import { db } from "../db";
 import { eq } from "drizzle-orm";
 import { tasksTable } from "../db/schemas";

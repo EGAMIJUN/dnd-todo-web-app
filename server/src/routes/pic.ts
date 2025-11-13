@@ -1,5 +1,4 @@
 import { Hono } from "hono";
-import { getPicList, setPicList } from "../../data";
 import { createPicValidator, movePicValidator } from "../validators/pic";
 import { db } from "../db";
 import { taskIdParamValidator } from "../validators/task";
