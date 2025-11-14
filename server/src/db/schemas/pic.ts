@@ -8,18 +8,14 @@ import {
 } from "drizzle-orm/mysql-core";
 import { tasksTable } from "./task";
 import { projectsTable } from "./project";
-import { seatTablesTable } from "./seat-table";
 
 export const picsTable = mysqlTable("pics", {
   id: int().autoincrement().primaryKey(),
   name: varchar({ length: 255 }).notNull(),
-  projectId: int("projectId")
+  projectId: int("project_id")
     .references(() => projectsTable.id)
     .notNull(),
-  seatTableId: int("seat_table_id")
-    .references(() => seatTablesTable.id)
-    .notNull(),
-  seatNumber: int("seat_number").notNull(),
+  seatNumber: int("seat_number"),
   profileImage: text("profile_image"),
   isDeleted: boolean("is_deleted").default(false),
 });
@@ -29,9 +25,5 @@ export const picRelations = relations(picsTable, ({ one, many }) => ({
   project: one(projectsTable, {
     fields: [picsTable.projectId],
     references: [projectsTable.id],
-  }),
-  seat: one(seatTablesTable, {
-    fields: [picsTable.seatTableId],
-    references: [seatTablesTable.id],
   }),
 }));

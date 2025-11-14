@@ -2,9 +2,10 @@ import z from "zod";
 
 export const createPicSchema = z.object({
   name: z.string(),
-  tableId: z.number(),
+  seatTableId: z.number(),
   seatNumber: z.number(),
   profileImage: z.string(),
+  projectId: z.number(),
 });
 
 export const picResponseSchema = z.object({
@@ -17,9 +18,20 @@ export const picResponseSchema = z.object({
 
 export const picIdParamSchema = z.object({ id: z.number() });
 
+export const getAllQuerySchema = z.object({
+  projectId: z.coerce.number().optional(),
+  seatTableId: z.coerce.number().optional(),
+});
+
 export const movePicSchema = z.object({
-  targetPicId: z.number(),
-  selectedPicId: z.number(),
+  target: z.object({
+    id: z.number(),
+    seatTableId: z.number(),
+  }),
+  current: z.object({
+    id: z.number(),
+    seatTableId: z.number(),
+  }),
 });
 
 export type PIC = z.infer<typeof picResponseSchema>;

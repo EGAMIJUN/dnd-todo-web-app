@@ -1,21 +1,32 @@
 import { Hono } from "hono";
-import { createPicValidator, movePicValidator } from "../validators/pic";
+import {
+  createPicValidator,
+  getAllQueryValidator,
+  movePicValidator,
+} from "../validators/pic";
 import { db } from "../db";
 import { taskIdParamValidator } from "../validators/task";
 import { and, eq } from "drizzle-orm";
-import { picsTable } from "../db/schemas";
+import { picsTable, picToSeatTables, seatTablesTable } from "../db/schemas";
 
 const picRoutes = new Hono();
 
 // get all pic
-picRoutes.get("/", async (c) => {
+picRoutes.get("/", getAllQueryValidator, async (c) => {
+  const query = c.req.valid("query");
   try {
-    const pics = await db.query.picsTable.findMany({
-      columns: { isDeleted: false },
+    const tables = await db.query.seatTablesTable.findMany({
+      where: and(
+        query.projectId
+          ? eq(seatTablesTable.projectId, query.projectId)
+          : undefined,
+        query.seatTableId
+          ? eq(seatTablesTable.id, Number(query.seatTableId))
+          : undefined,
+      ),
     });
-
-    return c.json(pics);
   } catch (error) {
+    console.log(error);
     return c.json({ message: "Error getting pics" }, 500);
   }
 });
@@ -38,9 +49,11 @@ picRoutes.get("/:id", taskIdParamValidator, async (c) => {
 picRoutes.post("/", createPicValidator, async (c) => {
   const newData = c.req.valid("json");
   try {
-    const newPic = await db.insert(picsTable).values(newData);
+    await db.transaction(async (tx) => {
+      const newPic = await tx.insert(picsTable).values(newData);
 
-    return c.json({ message: "success" });
+      return c.json({ message: "success" });
+    });
   } catch (error) {
     return c.json({ message: "Error creating pic" }, 500);
   }
@@ -49,27 +62,42 @@ picRoutes.post("/", createPicValidator, async (c) => {
 picRoutes.put("/", movePicValidator, async (c) => {
   const data = c.req.valid("json");
   try {
-    const targetPIC = await db.query.picsTable.findFirst({
-      where: eq(picsTable.id, data.targetPicId),
-    })!;
-    const selectedPIC = await db.query.picsTable.findFirst({
-      where: eq(picsTable.id, data.selectedPicId),
-    });
+    await db.transaction(async (tx) => {
+      const target = await tx.query.picToSeatTables.findFirst({
+        where: and(
+          eq(picToSeatTables.seatTableId, data.target.seatTableId),
+          eq(picToSeatTables.picId, data.target.id),
+        ),
+      });
+      const current = await tx.query.picToSeatTables.findFirst({
+        where: and(
+          eq(picToSeatTables.seatTableId, data.current.seatTableId),
+          eq(picToSeatTables.picId, data.current.id),
+        ),
+      });
 
-    await db.update(picsTable).set({
-      ...targetPIC,
-      tableId: selectedPIC!.tableId,
-      seatNumber: selectedPIC!.seatNumber,
-    });
+      // update target
+      await tx
+        .update(picToSeatTables)
+        .set({
+          seatTableId: current!.seatTableId,
+          seatNumber: current!.seatNumber,
+        })
+        .where(eq(picToSeatTables.id, target!.id));
 
-    await db.update(picsTable).set({
-      ...selectedPIC,
-      tableId: targetPIC!.tableId,
-      seatNumber: targetPIC!.seatNumber,
+      // update current
+      await tx
+        .update(picToSeatTables)
+        .set({
+          seatTableId: target!.seatTableId,
+          seatNumber: target!.seatNumber,
+        })
+        .where(eq(picToSeatTables.id, current!.id));
     });
 
     return c.json({ message: "success" });
   } catch (error) {
+    console.log(error);
     return c.json({ message: "Error moving task" }, 500);
   }
 });

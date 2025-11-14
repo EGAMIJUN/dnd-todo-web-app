@@ -41,6 +41,9 @@ export const taskResponseSchema = z.object({
 });
 
 export const taskIdParamSchema = z.object({ id: z.number() });
+export const projectIdParamSchema = z.object({
+  projectId: z.coerce.number().optional(),
+});
 
 export type Task = z.infer<typeof taskResponseSchema>;
 export type AssignTaskRequest = z.infer<typeof assignTaskRequestSchema>;

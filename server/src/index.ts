@@ -2,6 +2,8 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { taskRoutes } from "./routes/tasks";
 import { picRoutes } from "./routes/pic";
+import { projectRoutes } from "./routes/projects";
+import { seatTableRoutes } from "./routes/seat-tables";
 
 const app = new Hono().basePath("/api/v1");
 
@@ -12,5 +14,9 @@ app.use("/*", cors({ origin: [process.env.CLIENT_URL] }));
 app.route("/task/", taskRoutes);
 
 app.route("/pic/", picRoutes);
+
+app.route("/projects/", projectRoutes);
+
+app.route("/seat-tables/", seatTableRoutes);
 
 export default { port: process.env.PORT, fetch: app.fetch };

@@ -4,6 +4,7 @@ import {
   createTaskValidator,
   moveTaskValidator,
   taskIdParamValidator,
+  taskProjecIdQueryParamValidator,
 } from "../validators/task";
 import { db } from "../db";
 import { eq } from "drizzle-orm";
@@ -12,7 +13,8 @@ import { tasksTable } from "../db/schemas";
 const taskRoutes = new Hono();
 
 // get all tasks
-taskRoutes.get("/", async (c) => {
+taskRoutes.get("/", taskProjecIdQueryParamValidator, async (c) => {
+  const query = c.req.valid("query");
   try {
     const tasks = await db.query.tasksTable.findMany({
       columns: {
@@ -20,6 +22,9 @@ taskRoutes.get("/", async (c) => {
         picId: false,
       },
       with: { pic: true },
+      where: query.projectId
+        ? eq(tasksTable.projectId, query.projectId)
+        : undefined,
     });
     return c.json(tasks);
   } catch (error) {

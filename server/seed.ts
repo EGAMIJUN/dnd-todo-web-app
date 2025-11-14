@@ -2,8 +2,10 @@ import { seed } from "drizzle-seed";
 import { db } from "./src/db";
 import * as schema from "./src/db/schemas";
 
+const { picToSeatTables, picToSeatTablesRelations, ...rest } = schema;
+
 const seedDB = async () => {
-  await seed(db, schema, { count: 100 }).refine((f) => ({
+  await seed(db, rest, { count: 100 }).refine((f) => ({
     projectsTable: {
       columns: {
         projectName: f.valuesFromArray({
@@ -17,6 +19,17 @@ const seedDB = async () => {
       count: 30,
       columns: {
         name: f.fullName(),
+        seatNumber: f.int({
+          minValue: 0,
+          maxValue: 50,
+          isUnique: true,
+        }),
+      },
+    },
+    seatTablesTable: {
+      count: 10,
+      columns: {
+        tableName: f.companyName(),
       },
     },
     tasksTable: {

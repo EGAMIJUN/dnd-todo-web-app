@@ -2,19 +2,36 @@ import { zValidator } from "@hono/zod-validator";
 import {
   assignTaskRequestSchema,
   movetaskRequestSchema,
+  projectIdParamSchema,
   taskIdParamSchema,
   taskRequestSchema,
 } from "./schema";
 
-const getTaskByIdValidator = zValidator("json", taskRequestSchema, (res, c) => {
-  if (!res.success) return c.json(res.error, 400);
-});
+export const getTaskByIdValidator = zValidator(
+  "json",
+  taskRequestSchema,
+  (res, c) => {
+    if (!res.success) return c.json(res.error, 400);
+  },
+);
 
-const createTaskValidator = zValidator("json", taskRequestSchema, (res, c) => {
-  if (!res.success) return c.json(res.error, 400);
-});
+export const createTaskValidator = zValidator(
+  "json",
+  taskRequestSchema,
+  (res, c) => {
+    if (!res.success) return c.json(res.error, 400);
+  },
+);
 
-const taskIdParamValidator = zValidator(
+export const taskProjecIdQueryParamValidator = zValidator(
+  "query",
+  projectIdParamSchema,
+  (res, c) => {
+    if (!res.success) return c.json(res.error, 400);
+  },
+);
+
+export const taskIdParamValidator = zValidator(
   "param",
   taskIdParamSchema,
   (res, c) => {
@@ -22,7 +39,7 @@ const taskIdParamValidator = zValidator(
   },
 );
 
-const moveTaskValidator = zValidator(
+export const moveTaskValidator = zValidator(
   "json",
   movetaskRequestSchema,
   (res, c) => {
@@ -30,18 +47,10 @@ const moveTaskValidator = zValidator(
   },
 );
 
-const assignTaskvalidator = zValidator(
+export const assignTaskvalidator = zValidator(
   "json",
   assignTaskRequestSchema,
   (res, c) => {
     if (!res.success) return c.json(res.error, 400);
   },
 );
-
-export {
-  getTaskByIdValidator,
-  createTaskValidator,
-  moveTaskValidator,
-  assignTaskvalidator,
-  taskIdParamValidator,
-};

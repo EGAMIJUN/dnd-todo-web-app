@@ -1,6 +1,10 @@
 import { zValidator } from "@hono/zod-validator";
-import { createPicSchema, movePicSchema } from "./schema";
-import { taskIdParamSchema } from "../task/schema";
+import {
+  createPicSchema,
+  getAllQuerySchema,
+  movePicSchema,
+  picIdParamSchema,
+} from "./schema";
 
 export const createPicValidator = zValidator(
   "json",
@@ -12,7 +16,15 @@ export const createPicValidator = zValidator(
 
 export const picIdParamValidator = zValidator(
   "param",
-  taskIdParamSchema,
+  picIdParamSchema,
+  (res, c) => {
+    if (!res.success) return c.json(res.error, 400);
+  },
+);
+
+export const getAllQueryValidator = zValidator(
+  "query",
+  getAllQuerySchema,
   (res, c) => {
     if (!res.success) return c.json(res.error, 400);
   },

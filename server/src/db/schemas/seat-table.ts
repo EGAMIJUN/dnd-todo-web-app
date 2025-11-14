@@ -11,7 +11,7 @@ import { projectsTable } from "./project";
 
 export const seatTablesTable = mysqlTable("seat_tables", {
   id: int().autoincrement().primaryKey(),
-  tableName: varchar("project_name", { length: 255 }).notNull(),
+  tableName: varchar("table_name", { length: 255 }).notNull(),
   description: text(),
   createBy: varchar("create_by", { length: 255 }).notNull(),
   createDate: datetime("create_date", { mode: "string" }).default(sql`now()`),
