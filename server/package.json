@@ -7,7 +7,10 @@
     "db:generate": "bunx -b drizzle-kit generate",
     "db:push": "bunx drizzle-kit push",
     "db:pull": "bunx drizzle-kit pull",
-    "db:migrate": "bunx --bun -b drizzle-kit migrate"
+    "db:migrate": "bunx --bun -b drizzle-kit migrate",
+    "db:seed": "bun ./seed.ts",
+    "db:reset": "bun ./reset.ts",
+    "db:reseed": "bun ./reset.ts && bun ./seed.ts"
   },
   "private": true,
   "devDependencies": {
@@ -21,6 +24,7 @@
   "dependencies": {
     "@hono/zod-validator": "^0.7.4",
     "drizzle-orm": "^0.44.7",
+    "drizzle-seed": "^0.3.1",
     "drizzle-zod": "^0.8.3",
     "hono": "^4.10.4",
     "mysql2": "^3.15.3",

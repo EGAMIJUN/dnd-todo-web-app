@@ -36,6 +36,13 @@
       "when": 1763012787766,
       "tag": "0004_next_smasher",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1763079639670,
+      "tag": "0005_whole_stephen_strange",
+      "breakpoints": true
     }
   ]
 }
