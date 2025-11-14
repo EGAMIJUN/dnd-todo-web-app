@@ -1,8 +1,14 @@
 import EmptyComponent from "@/components/state-components/empty";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import type { PIC } from "@/types";
-import { memo, type ComponentProps, type FC } from "react";
+import type { PicTable } from "@/types";
+import {
+  memo,
+  useContext,
+  useEffect,
+  type ComponentProps,
+  type FC,
+} from "react";
 import DroppablePIC from "./droppable-pic";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -17,31 +23,44 @@ import {
 import CreatePICForm from "./create-pic-form";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import { useGetPicList } from "@/api-hooks/queries";
+import { DataContext } from "@/context";
+import { useParams } from "@tanstack/react-router";
 
 const SeatTable = memo(
   ({
-    id,
     data,
   }: ComponentProps<"div"> & {
-    id: string | number;
-    data: Array<PIC>;
+    data: PicTable;
   }) => {
+    const params = useParams({ from: "/$projectId/" });
+    const { localPics, setLocalPics } = useContext(DataContext)!;
+    const { data: picList, isSuccess: picListSuccess } = useGetPicList({
+      projectId: Number(params.projectId),
+      seatTableId: data.id,
+    });
+    useEffect(() => {
+      if (!picListSuccess) return;
+      setLocalPics(picList);
+    }, [picList, picListSuccess]);
+
     return (
       <Card className={cn("h-fit shadow-xl")}>
         <CardHeader aria-hidden className="flex justify-between relative">
-          {id}
+          {data.tableName}
           <CreatePICDialog />
         </CardHeader>
         <CardContent className="grid grid-cols-3 gap-4">
-          {data.map((p) => (
-            <div
-              key={p.id}
-              className="flex flex-col items-center gap-2 text-center"
-            >
-              <DroppablePIC id={`${p.tableId}${p.seatNumber}`} pic={p} />
-              <Badge variant={"outline"}>{p.name}</Badge>
-            </div>
-          ))}
+          {picListSuccess &&
+            picList.map((p) => (
+              <div
+                key={p.id}
+                className="flex flex-col items-center gap-2 text-center"
+              >
+                <DroppablePIC id={`${p.seatTableId}${p.seatNumber}`} pic={p} />
+                <Badge variant={"outline"}>{p.name}</Badge>
+              </div>
+            ))}
         </CardContent>
       </Card>
     );

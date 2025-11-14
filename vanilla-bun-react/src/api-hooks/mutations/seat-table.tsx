@@ -23,15 +23,12 @@ const useMovePic = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (payload: {
-      target: { picId: number; seatTableId: number };
-      current: { picId: number; seatTableId: number };
+      targetPicId: number;
+      selectedPicId: number;
     }) => {
       const response = await API.put<
         { message: string },
-        {
-          target: { picId: number; seatTableId: number };
-          current: { picId: number; seatTableId: number };
-        }
+        { targetPicId: number; selectedPicId: number }
       >("/pic/", payload);
 
       return response;

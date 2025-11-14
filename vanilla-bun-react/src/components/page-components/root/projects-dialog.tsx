@@ -1,3 +1,4 @@
+import { useGetProjects } from "@/api-hooks/queries";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -13,19 +14,15 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
+import { useNavigate } from "@tanstack/react-router";
 import { CornerDownRight, SearchIcon } from "lucide-react";
 import { useState, type FC } from "react";
 
 const ProjectsDialog: FC = () => {
+  const navigate = useNavigate();
   const [projectSearch, setProjectSearch] = useState<string>("");
   const [openDialog, setOpenDialog] = useState<boolean>(false);
-  const [projects, setProjects] = useState<Array<{ projectName: string }>>([
-    { projectName: "Namsung" },
-    { projectName: "Yabuki" },
-    { projectName: "Reefer" },
-    { projectName: "Job Portal" },
-    { projectName: "General" },
-  ]);
+  const { data: projects, isSuccess } = useGetProjects();
   return (
     <Dialog open={openDialog} onOpenChange={setOpenDialog}>
       <DialogTrigger asChild>
@@ -39,23 +36,30 @@ const ProjectsDialog: FC = () => {
         </DialogHeader>
         <DialogDescription aria-hidden hidden />
         <div className="flex flex-col">
-          {projects
-            .filter((p) =>
-              p.projectName
-                .trim()
-                .toLowerCase()
-                .includes(projectSearch.toLowerCase()),
-            )
-            .map((p, index) => (
-              <div
-                key={index}
-                className="p-2 hover:bg-foreground/5 hover:cursor-pointer transition-all duration-300 rounded-md flex gap-2"
-                onClick={() => setOpenDialog(false)}
-              >
-                <CornerDownRight />
-                {p.projectName}
-              </div>
-            ))}
+          {isSuccess &&
+            projects
+              .filter((p) =>
+                p.projectName
+                  .trim()
+                  .toLowerCase()
+                  .includes(projectSearch.toLowerCase()),
+              )
+              .map((p, index) => (
+                <div
+                  key={index}
+                  className="p-2 hover:bg-foreground/5 hover:cursor-pointer transition-all duration-300 rounded-md flex gap-2"
+                  onClick={() => {
+                    navigate({
+                      to: "/$projectId",
+                      params: { projectId: String(p.id) },
+                    });
+                    setOpenDialog(false);
+                  }}
+                >
+                  <CornerDownRight />
+                  {p.projectName}
+                </div>
+              ))}
         </div>
 
         <DialogFooter>

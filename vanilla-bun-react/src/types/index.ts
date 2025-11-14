@@ -20,7 +20,23 @@ export type Task = {
 export type PIC = {
   id: number;
   name: string;
-  tableId: number;
+  seatTableId: number;
   seatNumber: number;
   profileImage?: string;
+};
+
+export type PicTable = {
+  id: number;
+  tableName: string;
+  description: string;
+  createBy: string;
+  createDate: Date;
+};
+
+export type Project = {
+  id: number;
+  projectName: string;
+  description: string;
+  createBy: string;
+  createDate: Date;
 };

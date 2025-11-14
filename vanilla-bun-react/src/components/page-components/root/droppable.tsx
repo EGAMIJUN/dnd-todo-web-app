@@ -46,6 +46,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { toast } from "sonner";
 import EmptyComponent from "@/components/state-components/empty";
 import type { TaskStatus } from "@/types/contants";
+import { useParams } from "@tanstack/react-router";
 
 const Droppable = memo(
   ({
@@ -136,7 +137,10 @@ const defaultValues: z.infer<typeof createTaskSchema> = {
 };
 
 const CreateTaskDialog = () => {
-  const { data: picList, isSuccess } = useGetPicList();
+  const params = useParams({ from: "/$projectId/" });
+  const { data: picList, isSuccess } = useGetPicList({
+    projectId: Number(params.projectId),
+  });
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
   const form = useForm({
     defaultValues,

@@ -9,55 +9,48 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as CreateTaskRouteImport } from './routes/create-task'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ProjectIdIndexRouteImport } from './routes/$projectId/index'
 
-const CreateTaskRoute = CreateTaskRouteImport.update({
-  id: '/create-task',
-  path: '/create-task',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProjectIdIndexRoute = ProjectIdIndexRouteImport.update({
+  id: '/$projectId/',
+  path: '/$projectId/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/create-task': typeof CreateTaskRoute
+  '/$projectId': typeof ProjectIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/create-task': typeof CreateTaskRoute
+  '/$projectId': typeof ProjectIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/create-task': typeof CreateTaskRoute
+  '/$projectId/': typeof ProjectIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/create-task'
+  fullPaths: '/' | '/$projectId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/create-task'
-  id: '__root__' | '/' | '/create-task'
+  to: '/' | '/$projectId'
+  id: '__root__' | '/' | '/$projectId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  CreateTaskRoute: typeof CreateTaskRoute
+  ProjectIdIndexRoute: typeof ProjectIdIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/create-task': {
-      id: '/create-task'
-      path: '/create-task'
-      fullPath: '/create-task'
-      preLoaderRoute: typeof CreateTaskRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/': {
       id: '/'
       path: '/'
@@ -65,12 +58,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/$projectId/': {
+      id: '/$projectId/'
+      path: '/$projectId'
+      fullPath: '/$projectId'
+      preLoaderRoute: typeof ProjectIdIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  CreateTaskRoute: CreateTaskRoute,
+  ProjectIdIndexRoute: ProjectIdIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
